@@ -84,24 +84,24 @@ int main (void) {
 		background = 0;
 		printf(" COMMAND->\n");
 		setup(inputBuffer, args, &background);
-		pid_t pid = fork();
-		   if (pid == -1) {
-			  // When fork() returns -1, an error happened.
-			  perror("fork failed");
-			  exit(EXIT_FAILURE);
-		   }
-		   else if (pid == 0) {
-			  // When fork() returns 0, we are in the child process.
-			  printf("Hello from the child process!\n");
-			  execvp(&args,);
-			  _exit(EXIT_SUCCESS);  // exit() is unreliable here, so _exit must be used
-		   }
-		   else {
-			  // When fork() returns a positive number, we are in the parent process
-			  // and the return value is the PID of the newly created child process.
-			  int status;
-			  (void)waitpid(pid, &status, 0);
-		   }
+
+	   pid_t pid = fork();
+	   if (pid == -1) {
+		  // When fork() returns -1, an error happened.
+		  perror("fork failed");
+		  exit(EXIT_FAILURE);
+	   }
+	   else if (pid == 0) {
+		  // When fork() returns 0, we are in the child process.
+		   execvp(&inputBuffer,&args);
+		  _exit(EXIT_SUCCESS);  // exit() is unreliable here, so _exit must be used
+	   }
+	   else {
+		  // When fork() returns a positive number, we are in the parent process
+		  // and the return value is the PID of the newly created child process.
+		  int status;
+		  (void)waitpid(pid, &status, 0);
+	   }
 		/* the steps are:
 			(1) fork a child process using fork()
 			(2) the child process will invoke execvp()
