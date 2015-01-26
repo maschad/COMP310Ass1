@@ -3,7 +3,7 @@
  Name        : COMP310ass1.c
  Author      : Chad Nehemiah
  Version     :1.0
- Copyright   : 
+ Copyright   :
  Description : Hello World in C, Ansi-style
  ============================================================================
  */
@@ -93,6 +93,7 @@ int main (void) {
 		   else if (pid == 0) {
 			  // When fork() returns 0, we are in the child process.
 			  printf("Hello from the child process!\n");
+			  execvp(&args,);
 			  _exit(EXIT_SUCCESS);  // exit() is unreliable here, so _exit must be used
 		   }
 		   else {
