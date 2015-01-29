@@ -10,7 +10,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -22,7 +21,7 @@
   * null-terminated string.
   */
 
-void setup(char inputBuffer[], char *args[], int *background) {
+int setup(char inputBuffer[], char *args[], int *background) {
 	int length, /* # of characters in the command line */
 	i,			/* loop index for accessing inputBuffer array */
 	start,		/* index where beginning of next command parameter is */
@@ -72,18 +71,29 @@ void setup(char inputBuffer[], char *args[], int *background) {
 		}
 	}
 	args[ct] = NULL; 	/* just in case the input line was > 80 */
+
+	return //returns whether valid args was created or not
 }
 
 int main (void) {
+	char commands[10][100];/* Array to store last 10 commands*/
+	int letter,count = 0; /*keeps track of the commands*/
 	char inputBuffer[MAX_LINE];	/* buffer to hold the command entered */
 	int background;				/* equals 1 if a command is followed by '&' */
 	char *args[MAX_LINE/+1];	/* command line (of 80) has max of 40 arguments */
 	pid_t pid;
 
-	while (1) {					/* program terminates normall inside setup */
+	while (1) {					/* program terminates normally inside setup */
 		background = 0;
 		printf(" COMMAND->\n");
 		setup(inputBuffer, args, &background);
+		letter = 0;
+		while(letter < 80 && inputBuffer[letter]== "/n")
+		{
+			commands[count][letter] = &args[letter];
+			letter++;
+		}
+		count++;
 
 	   pid_t pid = fork();
 	   if (pid == -1) {
@@ -94,6 +104,7 @@ int main (void) {
 	   else if (pid == 0) {
 		  // When fork() returns 0, we are in the child process.
 		   execvp(&inputBuffer,&args);
+
 		  _exit(EXIT_SUCCESS);  // exit() is unreliable here, so _exit must be used
 	   }
 	   else {
