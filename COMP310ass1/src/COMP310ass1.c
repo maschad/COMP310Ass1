@@ -106,7 +106,7 @@ int main (void) {
 			history->prev = history;
 			history->next = NULL;
 		}
-		if(args[0][0] == 'r')/*History option when "r" is pressed user can execute previous command*/
+		if(args[0][0] == 'r' && args[0][1] == NULL)/*History option when "r" is pressed user can execute previous command*/
 		{
 			anode *current;
 			current = (struct node *)malloc(sizeof(struct node));
@@ -116,7 +116,7 @@ int main (void) {
 			{
 				if(args[1][0] == current->letter)
 				{
-					args = current->command;
+					args[0] = current->command[0];
 					break;
 				}
 				else
