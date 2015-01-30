@@ -15,7 +15,7 @@
 #define MAX_LINE 80
 
 typedef struct node{
-	char command;
+	char *command[MAX_LINE/+1];
 	char letter;
 	struct node *next;
 	struct node *prev;
@@ -97,14 +97,33 @@ int main (void) {
 		printf(" COMMAND->\n");
 		setup(inputBuffer, args, &background);
 
-		if(args[0][0] != "r")
+		if(args[0][0] != 'r')/*store commands unless argument = "r"*/
 		{
-			history->command = args[0][0];/*storing the command*/
-			history->letter = args[0];/*storing first letter of the command*/
-			count++;/*increment the count*/
+			history->command[0] = args[0];/*storing the command*/
+			history->letter = args[0][0];/*storing first letter of the command*/
+			count++;/*increment the count of executed commands*/
 			history->next = (struct node *)malloc(sizeof(struct node));
 			history->prev = history;
 			history->next = NULL;
+		}
+		if(args[0][0] == 'r')/*History option when "r" is pressed user can execute previous command*/
+		{
+			anode *current;
+			current = (struct node *)malloc(sizeof(struct node));
+			current = history;
+			int i = 0;
+			while(current->prev != NULL && i < 10)
+			{
+				if(args[1][0] == current->letter)
+				{
+					args = current->command;
+					break;
+				}
+				else
+				{
+					current->prev = history->prev;
+				}
+			}
 		}
 		pid_t pid = fork();
 		if (pid == -1) {
