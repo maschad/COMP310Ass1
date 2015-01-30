@@ -10,44 +10,18 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #define MAX_LINE 80
 
 typedef struct node{
-	char arg [];
 	char command;
 	char letter;
 	int length;
 	struct node *next;
 	struct node *prev;
-}node_t;
+}anode;
 
-
-void create(node_t * current, char * args[80])
-{
-	node_t * temp = malloc(sizeof(node_t));
-	current->next = temp;
-	temp->prev = current;
-	char *new= malloc(sizeof(args[0]));
-	strcpy(new, args[0]);
-	temp->command = new;
-	temp->letter= (new)[0];
-	int k=0;
-	while(1)
-	{
-		if (args[k] == NULL)
-		{
-			temp->length = k-1; break;
-		}
-		char *tera= malloc( sizeof(args[k]));
-		strcpy(tera, args[k]);
-		temp->arg[k]= tera;
-		k++;
-	}
-	temp->next = NULL;
-}
 
 
 /**
@@ -55,7 +29,7 @@ void create(node_t * current, char * args[80])
   * using whitespace as delimiters. setup() sets the args parameter as a
   * null-terminated string.
   */
-int setup(char inputBuffer[], char *args[], int *background) {
+void setup(char inputBuffer[], char *args[], int *background) {
 	int length, /* # of characters in the command line */
 	i,			/* loop index for accessing inputBuffer array */
 	start,		/* index where beginning of next command parameter is */
@@ -108,24 +82,29 @@ int setup(char inputBuffer[], char *args[], int *background) {
 }
 
 int main (void) {
-	node_t commands[10][100];/* Array to store last 10 commands*/
-	int letter,count = 0; /*keeps track of the commands*/
+	anode *history,*start;/* Array to store last 10 commands*/
+	int count = 0; /*keeps track of the commands*/
 	char inputBuffer[MAX_LINE];	/* buffer to hold the command entered */
 	int background;				/* equals 1 if a command is followed by '&' */
 	char *args[MAX_LINE/+1];	/* command line (of 80) has max of 40 arguments */
 	pid_t pid;
 
+	start = (struct node *)malloc(sizeof(struct node));/*allocating space for memory*/
+	history = start;
+	start->next = NULL;
+
 	while (1) {					/* program terminates normally inside setup */
 		background = 0;
 		printf(" COMMAND->\n");
 		setup(inputBuffer, args, &background);
-		letter = 0;
-		while(letter < 80 && inputBuffer[letter]== "/n")
-		{
-			letter++;
-		}
-		count++;
 
+		while(inputBuffer[count]!= NULL)
+		{
+			history->command = inputBuffer[count];
+			history->next = (struct node *)malloc(sizeof(struct node));
+			count++;
+		}
+		history->next = NULL;
 	   pid_t pid = fork();
 	   if (pid == -1) {
 		  // When fork() returns -1, an error happened.
