@@ -17,7 +17,6 @@
 typedef struct node{
 	char command;
 	char letter;
-	int length;
 	struct node *next;
 	struct node *prev;
 }anode;
@@ -98,15 +97,17 @@ int main (void) {
 		printf(" COMMAND->\n");
 		setup(inputBuffer, args, &background);
 
-		while(inputBuffer[count]!= NULL)
+		if(args[0][0] != "r")
 		{
-			history->command = inputBuffer[count];
+			history->command = args[0][0];/*storing the command*/
+			history->letter = args[0];/*storing first letter of the command*/
+			count++;/*increment the count*/
 			history->next = (struct node *)malloc(sizeof(struct node));
-			count++;
+			history->prev = history;
+			history->next = NULL;
 		}
-		history->next = NULL;
-	   pid_t pid = fork();
-	   if (pid == -1) {
+		pid_t pid = fork();
+		if (pid == -1) {
 		  // When fork() returns -1, an error happened.
 		  perror("fork failed");
 		  exit(EXIT_FAILURE);
@@ -114,7 +115,6 @@ int main (void) {
 	   else if (pid == 0) {
 		  // When fork() returns 0, we are in the child process.
 		   execvp(&inputBuffer,&args);
-
 		  _exit(EXIT_SUCCESS);  // exit() is unreliable here, so _exit must be used
 	   }
 	   else {
