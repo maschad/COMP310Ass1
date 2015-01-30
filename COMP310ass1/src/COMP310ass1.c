@@ -16,13 +16,14 @@
 #define MAX_LINE 80
 
 typedef struct node{
-	char *arg[];
+	char arg [];
 	char command;
 	char letter;
 	int length;
 	struct node *next;
 	struct node *prev;
 }node_t;
+
 
 void create(node_t * current, char * args[80])
 {
@@ -47,6 +48,7 @@ void create(node_t * current, char * args[80])
 	}
 	temp->next = NULL;
 }
+
 
 /**
   * setup() reads in the next command line, separating it into distinct tokens
@@ -103,8 +105,6 @@ int setup(char inputBuffer[], char *args[], int *background) {
 		}
 	}
 	args[ct] = NULL; 	/* just in case the input line was > 80 */
-
-	return //returns whether valid args was created or not
 }
 
 int main (void) {
@@ -122,7 +122,6 @@ int main (void) {
 		letter = 0;
 		while(letter < 80 && inputBuffer[letter]== "/n")
 		{
-			commands[count][letter] = &args[letter];
 			letter++;
 		}
 		count++;
@@ -143,7 +142,9 @@ int main (void) {
 		  // When fork() returns a positive number, we are in the parent process
 		  // and the return value is the PID of the newly created child process.
 		  int status;
-		  (void)waitpid(pid, &status, 0);
+		  if(background == 0){
+			  (void)waitpid(pid, &status, 0);
+		  }
 	   }
 		/* the steps are:
 			(1) fork a child process using fork()
