@@ -15,7 +15,7 @@
 #define MAX_LINE 80
 
 typedef struct node{
-	char command[MAX_LINE][MAX_LINE];
+	char command[MAX_LINE/+1][MAX_LINE/+1];
 	char letter;
 	struct node *next;
 	struct node *prev;
@@ -133,15 +133,12 @@ int main (void) {
 					while(y < num)
 					{
 						strcpy(args[y],current->command[y]);
-						printf("\n%s",current->command[y]);
 						y++;
 					}
 					break;
 				}
 				else
 				{
-					printf("\nI'm here");
-					printf("\n%c",current->letter);
 					current = current->prev;
 				}
 				i++;
@@ -155,6 +152,18 @@ int main (void) {
 	   }
 	   else if (pid == 0) {
 		  // When fork() returns 0, we are in the child process.
+		   if(args[0][0] == 'c'&& args[1][0] == 'd')/*for the cd command*/
+		   {
+		   			int executed = chdir(&args);/*storing if command was properly executed*/
+		   			if (executed == -1)/*command was erroneous*/
+		   			{
+		   				_exit(EXIT_FAILURE);
+		   			}
+		   			else/*command was properly executed*/
+		   			{
+		   				_exit(EXIT_SUCCESS);
+		   			}
+			}
 		   execvp(&inputBuffer,&args);
 		  _exit(EXIT_SUCCESS);  // exit() is unreliable here, so _exit must be used
 	   }
@@ -172,3 +181,4 @@ int main (void) {
 			(3) if background ==1, the parent will wait, otherwise to the setup() function */
 	}
 }
+
