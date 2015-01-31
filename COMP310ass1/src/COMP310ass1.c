@@ -21,6 +21,11 @@ typedef struct node{
 	struct node *prev;
 }anode;
 
+typedef struct list{
+	anode *firstNode;
+	anode *lastNode;
+}list;
+
 
 
 /**
@@ -83,6 +88,7 @@ void setup(char inputBuffer[], char *args[], int *background,int *num) {
 
 int main (void) {
 	anode *history,*start;/* Array to store last 10 commands*/
+	list *firstNode,*lastNode;/*To represent first and last node*/
 	int count = 0,num; /*keeps track of the commands and num represents amoutn of arguments*/
 	char inputBuffer[MAX_LINE];	/* buffer to hold the command entered */
 	int background;				/* equals 1 if a command is followed by '&' */
@@ -91,7 +97,6 @@ int main (void) {
 
 	start = (struct node *)malloc(sizeof(struct node));/*allocating space for memory*/
 	history = start;
-	start->next = NULL;
 
 	while (1) {					/* program terminates normally inside setup */
 		background = 0;
@@ -106,33 +111,40 @@ int main (void) {
 				strcpy(history->command[y],args[y]);/*storing the command*/
 				history->letter = args[0][0];/*storing first letter of the command*/
 				count++;/*increment the count of executed commands*/
-				history->next = (struct node *)malloc(sizeof(struct node));
-				history->prev = history;
-				history->next = NULL;
 				y++;
 			}
+			history->next = (struct node *)malloc(sizeof(struct node));
+			history->prev = history;
+			history->next = NULL;
+
 		}
 		if(args[0][0] == 'r' && args[0][1] == NULL)/*History option when "r" is pressed user can execute previous command*/
 		{
 			anode *current;
 			current = (struct node *)malloc(sizeof(struct node));
-			current = history->prev;
+			current = history->prev;/*ensuring we start at previous node where all commands are*/
 			int i = 0;
 			while(current->prev != NULL && i < 10)
 			{
-				int y = 0;
+
 				if(args[1][0] == current->letter)
 				{
+					int y = 0;
 					while(y < num)
 					{
 						strcpy(args[y],current->command[y]);
-						break;
+						printf("\n%s",current->command[y]);
+						y++;
 					}
+					break;
 				}
 				else
 				{
+					printf("\nI'm here");
+					printf("\n%c",current->letter);
 					current = current->prev;
 				}
+				i++;
 			}
 		}
 		pid_t pid = fork();
