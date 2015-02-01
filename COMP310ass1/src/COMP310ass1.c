@@ -15,7 +15,7 @@
 #define MAX_LINE 80
 
 typedef struct node{
-	char command[MAX_LINE/+1][MAX_LINE/+1];
+	char *command;
 	char letter;
 	struct node *next;
 	struct node *prev;
@@ -88,12 +88,10 @@ void setup(char inputBuffer[], char *args[], int *background,int *num) {
 
 int main (void) {
 	anode *history,*start;/* Array to store last 10 commands*/
-	list *firstNode,*lastNode;/*To represent first and last node*/
 	int count = 0,num; /*keeps track of the commands and num represents amoutn of arguments*/
 	char inputBuffer[MAX_LINE];	/* buffer to hold the command entered */
 	int background;				/* equals 1 if a command is followed by '&' */
 	char *args[MAX_LINE/+1];	/* command line (of 80) has max of 40 arguments */
-	pid_t pid;
 
 	start = (struct node *)malloc(sizeof(struct node));/*allocating space for memory*/
 	history = start;
@@ -105,14 +103,11 @@ int main (void) {
 
 		if(args[0][0] != 'r')/*store commands unless argument = "r"*/
 		{
-			int y = 0;
-			while(y < num)
-			{
-				strcpy(history->command[y],args[y]);/*storing the command*/
-				history->letter = args[0][0];/*storing first letter of the command*/
-				count++;/*increment the count of executed commands*/
-				y++;
-			}
+			char *data= malloc( sizeof(args[0]));
+			strcpy(data, args[0]);
+			history->command = data;/*storing the command*/
+			history->letter = args[0][0];/*storing first letter of the command*/
+			count++;/*increment the count of executed commands*/
 			history->next = (struct node *)malloc(sizeof(struct node));
 			history->prev = history;
 			history->next = NULL;
@@ -129,12 +124,7 @@ int main (void) {
 
 				if(args[1][0] == current->letter)
 				{
-					int y = 0;
-					while(y < num)
-					{
-						strcpy(args[y],current->command[y]);
-						y++;
-					}
+					strcpy(args[0],current->command);
 					break;
 				}
 				else
@@ -164,6 +154,22 @@ int main (void) {
 		   				_exit(EXIT_SUCCESS);
 		   			}
 			}
+		   if(args[0][0] == 'p'&& args[1][0] == 'w' && args[2][0] == 'd')
+		   {
+			    char *buf;
+			    int size = 100;
+
+			    int executed = getcwd(&buf,size);
+			    if (executed == -1)/*command was erroneous*/
+				{
+					_exit(EXIT_FAILURE);
+				}
+			    else/*command was properly executed*/
+				{
+			    	printf("\n%s",buf);
+					_exit(EXIT_SUCCESS);
+				}
+		   }
 		   execvp(&inputBuffer,&args);
 		  _exit(EXIT_SUCCESS);  // exit() is unreliable here, so _exit must be used
 	   }
