@@ -102,10 +102,10 @@ int main (void) {
 				h.head = 0;
 			}
 			h.letter[h.head] = args[0][0];
-			h.commands[h.head] = (char*)malloc(sizeof(char)*80);
 			while(y < num)/*Iterate through array to store commands */
 			{
-				strcpy(h.commands[y],args[y]);
+				h.commands[y] = (char*)malloc(sizeof(char)*80);
+				strncpy(h.commands[y],args[y],MAX_LINE);
 				y++;
 			}
 			h.head++;
@@ -117,7 +117,7 @@ int main (void) {
 			{
 				if(h.letter[i] == args[1][0])
 				{
-					strcpy(args[i],h.commands[i]);
+					strncpy(args[i],h.commands[i],MAX_LINE);
 					break;
 				}
 				else
