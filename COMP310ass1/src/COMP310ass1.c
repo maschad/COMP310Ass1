@@ -14,7 +14,10 @@
 #include <unistd.h>
 #define MAX_LINE 80
 
-
+typedef struct hist{
+	char *commands[10];
+	int head;
+}history;
 
 
 
@@ -76,24 +79,42 @@ void setup(char inputBuffer[], char *args[], int *background) {
 }
 
 int main (void) {
-	char *history[10];
 	char inputBuffer[MAX_LINE];	/* buffer to hold the command entered */
 	int background;				/* equals 1 if a command is followed by '&' */
 	char *args[MAX_LINE/+1];	/* command line (of 80) has max of 40 arguments */
+	history h;/* Object to store commands */
+	h.head = 0;/* Initialize head to 0*/
 
 	while (1) {					/* program terminates normally inside setup */
 		background = 0;
 		printf(" COMMAND->\n");
-		setup(inputBuffer, args, &background);
+		setup(inputBuffer,args,&background);
 
 		if(args[0][0] != 'r')/*store commands unless argument = "r"*/
 		{
-
-
+			if(h.head > 10)/*only store 10 commands*/
+			{
+				h.head = 0;
+			}
+			h.commands[h.head] = malloc(25);
+			strcpy(h.commands[h.head],args[0]);
+			h.head++;
 		}
-		if(args[0][0] == 'r' && args[0][1] == NULL)/*History option when "r" is pressed user can execute previous command*/
+		if(args[0][0] == 'r' && args[0][1] == NULL) /*History option when "r" is pressed user can execute previous command*/
 		{
-
+			int i = 0;
+			while(i < 10)
+			{
+				if(h.commands[i] == args[1][0])
+				{
+					strcpy(args[0],h.commands[i]);
+					break;
+				}
+				else
+				{
+					i++;
+				}
+			}
 		}
 		pid_t pid = fork();
 		if (pid == -1) {
