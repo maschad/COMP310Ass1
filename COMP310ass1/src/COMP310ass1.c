@@ -14,17 +14,7 @@
 #include <unistd.h>
 #define MAX_LINE 80
 
-typedef struct node{
-	char *command;
-	char letter;
-	struct node *next;
-	struct node *prev;
-}anode;
 
-typedef struct list{
-	anode *firstNode;
-	anode *lastNode;
-}list;
 
 
 
@@ -33,7 +23,7 @@ typedef struct list{
   * using whitespace as delimiters. setup() sets the args parameter as a
   * null-terminated string.
   */
-void setup(char inputBuffer[], char *args[], int *background,int *num) {
+void setup(char inputBuffer[], char *args[], int *background) {
 	int length, /* # of characters in the command line */
 	i,			/* loop index for accessing inputBuffer array */
 	start,		/* index where beginning of next command parameter is */
@@ -82,57 +72,28 @@ void setup(char inputBuffer[], char *args[], int *background,int *num) {
 				}
 		}
 	}
-	*num = ct;
 	args[ct] = NULL; 	/* just in case the input line was > 80 */
 }
 
 int main (void) {
-	anode *history,*start;/* Array to store last 10 commands*/
-	int count = 0,num; /*keeps track of the commands and num represents amoutn of arguments*/
+	char *history[10];
 	char inputBuffer[MAX_LINE];	/* buffer to hold the command entered */
 	int background;				/* equals 1 if a command is followed by '&' */
 	char *args[MAX_LINE/+1];	/* command line (of 80) has max of 40 arguments */
 
-	start = (struct node *)malloc(sizeof(struct node));/*allocating space for memory*/
-	history = start;
-
 	while (1) {					/* program terminates normally inside setup */
 		background = 0;
 		printf(" COMMAND->\n");
-		setup(inputBuffer, args, &background,&num);
+		setup(inputBuffer, args, &background);
 
 		if(args[0][0] != 'r')/*store commands unless argument = "r"*/
 		{
-			char *data= malloc( sizeof(args[0]));
-			strcpy(data, args[0]);
-			history->command = data;/*storing the command*/
-			history->letter = args[0][0];/*storing first letter of the command*/
-			count++;/*increment the count of executed commands*/
-			history->next = (struct node *)malloc(sizeof(struct node));
-			history->prev = history;
-			history->next = NULL;
+
 
 		}
 		if(args[0][0] == 'r' && args[0][1] == NULL)/*History option when "r" is pressed user can execute previous command*/
 		{
-			anode *current;
-			current = (struct node *)malloc(sizeof(struct node));
-			current = history->prev;/*ensuring we start at previous node where all commands are*/
-			int i = 0;
-			while(current->prev != NULL && i < 10)
-			{
 
-				if(args[1][0] == current->letter)
-				{
-					strcpy(args[0],current->command);
-					break;
-				}
-				else
-				{
-					current = current->prev;
-				}
-				i++;
-			}
 		}
 		pid_t pid = fork();
 		if (pid == -1) {
