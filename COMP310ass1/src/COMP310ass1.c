@@ -11,11 +11,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #define MAX_LINE 80
 
 typedef struct hist{
 	char *commands[10];
+	char letter[10];
 	int head;
 }history;
 
@@ -26,7 +28,7 @@ typedef struct hist{
   * using whitespace as delimiters. setup() sets the args parameter as a
   * null-terminated string.
   */
-void setup(char inputBuffer[], char *args[], int *background) {
+void setup(char inputBuffer[], char *args[], int *background, int *num) {
 	int length, /* # of characters in the command line */
 	i,			/* loop index for accessing inputBuffer array */
 	start,		/* index where beginning of next command parameter is */
@@ -75,12 +77,14 @@ void setup(char inputBuffer[], char *args[], int *background) {
 				}
 		}
 	}
+	*num = ct;
 	args[ct] = NULL; 	/* just in case the input line was > 80 */
 }
 
 int main (void) {
 	char inputBuffer[MAX_LINE];	/* buffer to hold the command entered */
-	int background;				/* equals 1 if a command is followed by '&' */
+	int background;/* equals 1 if a command is followed by '&' */
+	int num;/*allows me to track # of arguments*/
 	char *args[MAX_LINE/+1];	/* command line (of 80) has max of 40 arguments */
 	history h;/* Object to store commands */
 	h.head = 0;/* Initialize head to 0*/
@@ -88,16 +92,22 @@ int main (void) {
 	while (1) {					/* program terminates normally inside setup */
 		background = 0;
 		printf(" COMMAND->\n");
-		setup(inputBuffer,args,&background);
+		setup(inputBuffer,args,&background,&num);
 
 		if(args[0][0] != 'r')/*store commands unless argument = "r"*/
 		{
+			int y = 0;/*iterate through array to pass args into history*/
 			if(h.head > 10)/*only store 10 commands*/
 			{
 				h.head = 0;
 			}
-			h.commands[h.head] = malloc(25);
-			strcpy(h.commands[h.head],args[0]);
+			h.letter[h.head] = args[0][0];
+			h.commands[h.head] = (char*)malloc(sizeof(char)*80);
+			while(y < num)/*Iterate through array to store commands */
+			{
+				strcpy(h.commands[y],args[y]);
+				y++;
+			}
 			h.head++;
 		}
 		if(args[0][0] == 'r' && args[0][1] == NULL) /*History option when "r" is pressed user can execute previous command*/
@@ -105,9 +115,9 @@ int main (void) {
 			int i = 0;
 			while(i < 10)
 			{
-				if(h.commands[i] == args[1][0])
+				if(h.letter[i] == args[1][0])
 				{
-					strcpy(args[0],h.commands[i]);
+					strcpy(args[i],h.commands[i]);
 					break;
 				}
 				else
