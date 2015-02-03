@@ -17,6 +17,8 @@
 
 typedef struct hist{
 	char *commands[10];
+	char *input[MAX_LINE];
+	int params[10];
 	char letter[10];
 	int head;
 }history;
@@ -102,13 +104,16 @@ int main (void) {
 				h.head = 0;
 			}
 			h.letter[h.head] = args[0][0];
+			h.params[h.head] = num;
 			while(y < num)/*Iterate through array to store commands */
 			{
-				h.commands[y] = (char*)malloc(sizeof(char)*80);
-				strncpy(h.commands[y],args[y],MAX_LINE);
+				h.commands[y] = (char*)malloc(sizeof(char)*80);/*allocating space for memory*/
+				h.input[y] = (char*)malloc(sizeof(char)*80);/*allocating space for memory*/
+				strncpy(h.commands[y],args[y],MAX_LINE);/*copying into history array*/
+				strncpy(h.input[y],inputBuffer,MAX_LINE);
 				y++;
 			}
-			h.head++;
+			h.head++;/*keeps track of the head*/
 		}
 		if(args[0][0] == 'r' && args[0][1] == NULL) /*History option when "r" is pressed user can execute previous command*/
 		{
@@ -117,7 +122,14 @@ int main (void) {
 			{
 				if(h.letter[i] == args[1][0])
 				{
-					strncpy(args[i],h.commands[i],MAX_LINE);
+					int y = 0;
+					strncpy(inputBuffer,h.input[i],MAX_LINE);/*changing inputBuffer to fit command*/
+					while(y < h.params[i])
+					{
+						args[y] = (char*)malloc(sizeof(char)*80);/*allocating space for memory*/
+						strncpy(args[y],h.commands[y],MAX_LINE);
+						y++;
+					}
 					break;
 				}
 				else
