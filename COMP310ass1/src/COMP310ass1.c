@@ -4,7 +4,7 @@
  Author      : Chad Nehemiah
  Version     :1.0
  Copyright   :
- Description : Hello World in C, Ansi-style
+ Description : COMP 310 Assignment #1
  ============================================================================
  */
 
@@ -17,14 +17,18 @@
 #define MAX_LINE 80
 
 typedef struct hist{
-	char *commands[10];
-	char *input[MAX_LINE];
-	int params[10];
-	char letter[10];
-	int head;
+	char *commands[10];/*stores commands*/
+	char *input[MAX_LINE];/*stores inputBuffer*/
+	int params[10];/*stores amount of parameters per argument*/
+	char letter[10];/*stores first letter of command*/
+	int head;/*stores the head*/
 }history;
 
-
+typedef struct jobs{
+	int jobNums[100];/*array to store jobs by pid number*/
+	char *names[100];/*array to store names of jobs*/
+	int end;/*most recent command*/
+}job;
 
 /**
   * setup() reads in the next command line, separating it into distinct tokens
@@ -88,11 +92,14 @@ int main (void) {
 	char inputBuffer[MAX_LINE];	/* buffer to hold the command entered */
 	int background;/* equals 1 if a command is followed by '&' */
 	int toStore;/*int value indicating whether command was erroneous or not*/
+	int total = 0; /*variable to store total amount of jobs executed*/
 	int num;/*allows me to track # of arguments*/
-	pid_t pid;/*Variable for storing process IDs*/
+	job aJob; /*structure for storing jobs*/
+	pid_t pid,child;/*Variable for storing process IDs*/
 	char *args[MAX_LINE/+1];	/* command line (of 80) has max of 40 arguments */
 	history h;/* Object to store commands */
 	h.head = 0;/* Initialize head to 0*/
+	aJob.end = 0;/*Initialize end of array to 0*/
 
 	while (1) {					/* program terminates normally inside setup */
 		background = 0;
@@ -103,7 +110,7 @@ int main (void) {
 			printf("\nErroneous Command");
 			toStore = setup(inputBuffer,args,&background,&num);
 		}
-
+		total++;/* a job has been prepared */
 		if(args[0][0] != 'r' && toStore != 1)/*store commands unless argument = "r"*/
 		{
 			int y = 0;/*iterate through array to pass args into history*/
@@ -151,19 +158,20 @@ int main (void) {
 		if(inputBuffer[0] == 'j' && inputBuffer[1]== 'o' && inputBuffer[2] =='b' && inputBuffer[3] == 's')
 		{
 			int i;
-			int status;
-			int jobNums[100];/*array to store jobs by number*/
-			while(waitpid(pid,&status,WNOHANG) == 0 )
+			for(i = 0; i < aJob.end; i++)
 			{
-				printf("Job # %i",pid);
-				jobNums[i] = pid;
-				i++;
+				printf("\nJob # %i",aJob.jobNums[i]);
+				printf("\nJob name %s",aJob.names[i]);
 			}
 		}
 	   if(inputBuffer[0] == 'c' && inputBuffer[1] == 'd')/*for the cd command*/
 	   {
 		   chdir (args[1]);
 		}
+	   if(strcmp(inputBuffer,"exit") == 0)
+	   {
+		   _exit(0);
+	   }
 	   if(inputBuffer[0] == 'p'&& inputBuffer[1]== 'w' && inputBuffer[2] == 'd')
 	   {
 		   long size;/*initializing variables for getcwd command*/
@@ -175,14 +183,14 @@ int main (void) {
 		   if ((buf = (char *)malloc((size_t)size)) != NULL)
 		   ptr = getcwd(buf, (size_t)size);
 	   }
-		pid = fork();	// When fork() returns 0, we are in the child process.
+		child = fork();	// When fork() returns 0, we are in the child process.
 		if (pid == -1) {
 		  // When fork() returns -1, an error happened.
 		  perror("fork failed");
 		  exit(EXIT_FAILURE);
 	   }
-	   else if (pid == 0) {
-		   execvp(&inputBuffer,&args);
+	   else if (child == 0) {
+		   execvp(inputBuffer,args);
 		  _exit(EXIT_SUCCESS);  // exit() is unreliable here, so _exit must be used
 	   }
 	   else {
@@ -192,6 +200,14 @@ int main (void) {
 		  if(background == 0){
 			  (void)waitpid(pid, &status, 0);
 		  }
+		  else{
+			  aJob.jobNums[aJob.end] = child;
+			  aJob.names[aJob.end] = (char*)malloc(sizeof(char)*80);
+			  strcpy(aJob.names[aJob.end],inputBuffer);
+			  aJob.end++;
+			  continue;
+		  }
+
 	   }
 	}
 		/* the steps are:
