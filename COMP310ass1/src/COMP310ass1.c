@@ -107,13 +107,13 @@ int main (void) {
 			h.params[h.head] = num;
 			while(y < num)/*Iterate through array to store commands */
 			{
-				h.commands[y] = (char*)malloc(sizeof(char)*80);/*allocating space for memory*/
-				h.input[y] = (char*)malloc(sizeof(char)*80);/*allocating space for memory*/
-				strncpy(h.commands[y],args[y],MAX_LINE);/*copying into history array*/
-				strncpy(h.input[y],inputBuffer,MAX_LINE);
+				h.commands[h.head] = (char*)malloc(sizeof(char)*80);/*allocating space for memory*/
+				h.input[h.head] = (char*)malloc(sizeof(char)*80);/*allocating space for memory*/
+				strncpy(h.commands[h.head],args[y],MAX_LINE);/*copying into history array*/
+				strncpy(h.input[h.head],inputBuffer,MAX_LINE);/*copying data into history inputBuffer array*/
+				h.head++;/*keeps track of the head*/
 				y++;
 			}
-			h.head++;/*keeps track of the head*/
 		}
 		if(args[0][0] == 'r' && args[0][1] == NULL) /*History option when "r" is pressed user can execute previous command*/
 		{
@@ -124,10 +124,12 @@ int main (void) {
 				{
 					int y = 0;
 					strncpy(inputBuffer,h.input[i],MAX_LINE);/*changing inputBuffer to fit command*/
+					int z = i;
 					while(y < h.params[i])
 					{
 						args[y] = (char*)malloc(sizeof(char)*80);/*allocating space for memory*/
-						strncpy(args[y],h.commands[y],MAX_LINE);
+						strncpy(args[y],h.commands[z],MAX_LINE);
+						z++;
 						y++;
 					}
 					break;
