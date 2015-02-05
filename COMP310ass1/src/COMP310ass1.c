@@ -28,6 +28,7 @@ typedef struct jobs{
 	int jobNums[100];/*array to store jobs by pid number*/
 	char *names[100];/*array to store names of jobs*/
 	int end;/*most recent command*/
+	char *args[100];/*to store arguments*/
 }job;
 
 /**
@@ -164,6 +165,31 @@ int main (void) {
 				printf("\nJob name %s",aJob.names[i]);
 			}
 		}
+		if(inputBuffer[0] == 'f' && inputBuffer[1] == 'g')
+		{
+			int i;
+			for(i = 0; i < aJob.end; i++)
+			{
+				if(aJob.jobNums[i] == atoi(args[1]))
+				{
+					printf("i'm here");
+					pid = fork();
+					if(pid == 0)
+					{
+						execvp(aJob.names[i],aJob.args[i]);
+					}
+					else
+					{
+						int status;
+						(void)waitpid(pid, &status, 0);
+					}
+					aJob.names[i] = NULL;
+					aJob.jobNums[i] = NULL;
+					break;
+				}
+			}
+
+		}
 	   if(inputBuffer[0] == 'c' && inputBuffer[1] == 'd')/*for the cd command*/
 	   {
 		   chdir (args[1]);
@@ -203,7 +229,9 @@ int main (void) {
 		  else{
 			  aJob.jobNums[aJob.end] = child;
 			  aJob.names[aJob.end] = (char*)malloc(sizeof(char)*80);
+			  aJob.args[aJob.end] = (char*)malloc(sizeof(char)*80);
 			  strcpy(aJob.names[aJob.end],inputBuffer);
+			  strcpy(aJob.args[aJob.end],args[1]);
 			  aJob.end++;
 			  continue;
 		  }
