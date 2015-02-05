@@ -9,6 +9,7 @@
  */
 
 #include <stdio.h>
+#include <sys/wait.h>
 #include <stdlib.h>
 #include <stdlib.h>
 #include <string.h>
@@ -88,6 +89,7 @@ int main (void) {
 	int background;/* equals 1 if a command is followed by '&' */
 	int toStore;/*int value indicating whether command was erroneous or not*/
 	int num;/*allows me to track # of arguments*/
+	pid_t pid;/*Variable for storing process IDs*/
 	char *args[MAX_LINE/+1];	/* command line (of 80) has max of 40 arguments */
 	history h;/* Object to store commands */
 	h.head = 0;/* Initialize head to 0*/
@@ -146,22 +148,25 @@ int main (void) {
 				}
 			}
 		}
+		if(inputBuffer[0] == 'j' && inputBuffer[1]== 'o' && inputBuffer[2] =='b' && inputBuffer[3] == 's')
+		{
+			int i;
+			int status;
+			int jobNums[100];/*array to store jobs by number*/
+			while(waitpid(pid,&status,WNOHANG) == 0 )
+			{
+				printf("Job # %i",pid);
+				jobNums[i] = pid;
+				i++;
+			}
+		}
 	   if(inputBuffer[0] == 'c' && inputBuffer[1] == 'd')/*for the cd command*/
 	   {
-			int executed = chdir(args[1]);/*storing if command was properly executed*/
-			if (executed == -1)/*command was erroneous*/
-			{
-				printf("\nError in command");
-				_exit(EXIT_FAILURE);
-			}
-			else/*command was properly executed*/
-			{
-				_exit(EXIT_SUCCESS);
-			}
+		   chdir (args[1]);
 		}
 	   if(inputBuffer[0] == 'p'&& inputBuffer[1]== 'w' && inputBuffer[2] == 'd')
 	   {
-		   long size;
+		   long size;/*initializing variables for getcwd command*/
 		   char *buf;
 		   char *ptr;
 
@@ -170,7 +175,7 @@ int main (void) {
 		   if ((buf = (char *)malloc((size_t)size)) != NULL)
 		   ptr = getcwd(buf, (size_t)size);
 	   }
-		pid_t pid = fork();	// When fork() returns 0, we are in the child process.
+		pid = fork();	// When fork() returns 0, we are in the child process.
 		if (pid == -1) {
 		  // When fork() returns -1, an error happened.
 		  perror("fork failed");
