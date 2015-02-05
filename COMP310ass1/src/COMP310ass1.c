@@ -30,7 +30,7 @@ typedef struct hist{
   * using whitespace as delimiters. setup() sets the args parameter as a
   * null-terminated string.
   */
-void setup(char inputBuffer[], char *args[], int *background, int *num) {
+int setup(char inputBuffer[], char *args[], int *background, int *num) {
 	int length, /* # of characters in the command line */
 	i,			/* loop index for accessing inputBuffer array */
 	start,		/* index where beginning of next command parameter is */
@@ -43,10 +43,10 @@ void setup(char inputBuffer[], char *args[], int *background, int *num) {
 
 	start = -1;
 	if (length == 0)
-		exit(0);				/* ^d was entered, end of user command stream */
+		return 1;				/* ^d was entered, end of user command stream */
 	if (length < 0) {
 		perror("error reading the command");
-		exit(-1);			/* terminate with error of -1 */
+		return -1;			/* terminate with error of -1 */
 	}
 
 	/* examine every character in the inputBuffer */
@@ -86,6 +86,7 @@ void setup(char inputBuffer[], char *args[], int *background, int *num) {
 int main (void) {
 	char inputBuffer[MAX_LINE];	/* buffer to hold the command entered */
 	int background;/* equals 1 if a command is followed by '&' */
+	int toStore;/*int value indicating whether command was erroneous or not*/
 	int num;/*allows me to track # of arguments*/
 	char *args[MAX_LINE/+1];	/* command line (of 80) has max of 40 arguments */
 	history h;/* Object to store commands */
@@ -94,9 +95,14 @@ int main (void) {
 	while (1) {					/* program terminates normally inside setup */
 		background = 0;
 		printf(" COMMAND->\n");
-		setup(inputBuffer,args,&background,&num);
+		toStore = setup(inputBuffer,args,&background,&num);
+		while(toStore == -1)
+		{
+			printf("\nErroneous Command");
+			toStore = setup(inputBuffer,args,&background,&num);
+		}
 
-		if(args[0][0] != 'r')/*store commands unless argument = "r"*/
+		if(args[0][0] != 'r' && toStore != 1)/*store commands unless argument = "r"*/
 		{
 			int y = 0;/*iterate through array to pass args into history*/
 			if(h.head > 10)/*only store 10 commands*/
@@ -120,16 +126,16 @@ int main (void) {
 			int i = 0;
 			while(i < 10)
 			{
-				if(h.letter[i] == args[1][0])
+				if(h.letter[i] == args[1][0])/*when letter matches argument*/
 				{
-					int y = 0;
+					int y = 0;/*counter to iterate through array based on # of arguments*/
 					strncpy(inputBuffer,h.input[i],MAX_LINE);/*changing inputBuffer to fit command*/
-					int z = i;
+					int z = i;/*store where command was located in histroy*/
 					while(y < h.params[i])
 					{
 						args[y] = (char*)malloc(sizeof(char)*80);/*allocating space for memory*/
-						strncpy(args[y],h.commands[z],MAX_LINE);
-						z++;
+						strncpy(args[y],h.commands[z],MAX_LINE);/*copy over data*/
+						z++;/*increment counters*/
 						y++;
 					}
 					break;
@@ -140,42 +146,37 @@ int main (void) {
 				}
 			}
 		}
-		pid_t pid = fork();
+	   if(inputBuffer[0] == 'c' && inputBuffer[1] == 'd')/*for the cd command*/
+	   {
+			int executed = chdir(args[1]);/*storing if command was properly executed*/
+			if (executed == -1)/*command was erroneous*/
+			{
+				printf("\nError in command");
+				_exit(EXIT_FAILURE);
+			}
+			else/*command was properly executed*/
+			{
+				_exit(EXIT_SUCCESS);
+			}
+		}
+	   if(inputBuffer[0] == 'p'&& inputBuffer[1]== 'w' && inputBuffer[2] == 'd')
+	   {
+		   long size;
+		   char *buf;
+		   char *ptr;
+
+		   size = pathconf(".", _PC_PATH_MAX);
+
+		   if ((buf = (char *)malloc((size_t)size)) != NULL)
+		   ptr = getcwd(buf, (size_t)size);
+	   }
+		pid_t pid = fork();	// When fork() returns 0, we are in the child process.
 		if (pid == -1) {
 		  // When fork() returns -1, an error happened.
 		  perror("fork failed");
 		  exit(EXIT_FAILURE);
 	   }
 	   else if (pid == 0) {
-		  // When fork() returns 0, we are in the child process.
-		   if(args[0][0] == 'c'&& args[1][0] == 'd')/*for the cd command*/
-		   {
-		   			int executed = chdir(&args);/*storing if command was properly executed*/
-		   			if (executed == -1)/*command was erroneous*/
-		   			{
-		   				_exit(EXIT_FAILURE);
-		   			}
-		   			else/*command was properly executed*/
-		   			{
-		   				_exit(EXIT_SUCCESS);
-		   			}
-			}
-		   if(args[0][0] == 'p'&& args[1][0] == 'w' && args[2][0] == 'd')
-		   {
-			    char *buf;
-			    int size = 100;
-
-			    int executed = getcwd(&buf,size);
-			    if (executed == -1)/*command was erroneous*/
-				{
-					_exit(EXIT_FAILURE);
-				}
-			    else/*command was properly executed*/
-				{
-			    	printf("\n%s",buf);
-					_exit(EXIT_SUCCESS);
-				}
-		   }
 		   execvp(&inputBuffer,&args);
 		  _exit(EXIT_SUCCESS);  // exit() is unreliable here, so _exit must be used
 	   }
@@ -187,10 +188,10 @@ int main (void) {
 			  (void)waitpid(pid, &status, 0);
 		  }
 	   }
+	}
 		/* the steps are:
 			(1) fork a child process using fork()
 			(2) the child process will invoke execvp()
 			(3) if background ==1, the parent will wait, otherwise to the setup() function */
-	}
 }
 
